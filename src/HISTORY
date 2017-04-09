@@ -40,7 +40,7 @@ Version 1.17  2011-01-09
     you must upgrade your FastDFS server to V2.07 or higher version
   * support list group stats and storage stats
   * support delete storage server
-  * add monitor class: org.csource.fastdfs.test.Monitor
+  * add monitor class: Monitor
   
 Version 1.16  2010-10-17
   * upload file can get available storage server list of the group, 
@@ -59,7 +59,7 @@ Version 1.14  2010-06-22
     read and write
 
 Version 1.13  2010-05-30
-  * org.csource.fastdfs.ProtoCommon add method genSlaveFilename
+  * ProtoCommon add method genSlaveFilename
   * support ACTIVE_TEST command. you must upgrade your FastDFS server
     to V1.28 or higher version
 
@@ -72,12 +72,12 @@ Version 1.11  2009-10-22
   * correct interface / class name from beginning with Dowload to Download
   * auto reconnect with reused connection when IOException ocurs
   * test classes move to package org.csource.fastdfs.test
-  * add classes org.csource.fastdfs.UploadStream and 
-    org.csource.fastdfs.DownloadStream for streaming writing or reading
+  * add classes UploadStream and
+    DownloadStream for streaming writing or reading
     
 Version 1.10  2009-10-04
   * support multi-tracker server group, you can make multi 
-    org.csource.fastdfs.TrackerClient instances for each tracker server group
+    TrackerClient instances for each tracker server group
   
 Version 1.9  2009-10-01
   * add load test class: org.csource.fastdfs.TestLoad
