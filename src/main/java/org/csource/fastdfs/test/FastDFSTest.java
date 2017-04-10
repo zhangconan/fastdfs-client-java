@@ -28,7 +28,7 @@ public class FastDFSTest {
 		System.out.println("Upload local file " + filePath + " ok, fileid=" + fileId);
 		// fileId:	group1/M00/00/00/wKgEfVUYPieAd6a0AAP3btxj__E335.jpg
 		//group1/M00/00/00/wKi0hVjqXGeAcyFfAAGSt-FxG-0872.jpg
-		//group1/M00/02/8F/rBH7Y1jqXJqATLrfAAGSt-FxG-0932.jpg
+		//http://59.110.168.29:8888/group1/M00/02/8F/rBH7Y1jqXJqATLrfAAGSt-FxG-0932.jpg
 		// url:	http://192.168.4.125:8888/group1/M00/00/00/wKgEfVUYPieAd6a0AAP3btxj__E335.jpg
 	}
 	

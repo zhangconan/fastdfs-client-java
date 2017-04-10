@@ -30,12 +30,15 @@ public class FastDFSClient {
 	static {
 		try {
 			logger.info("=== CONF_FILENAME:" + CONF_FILENAME);
+			//初始化配置信息
 			ClientGlobal.init(CONF_FILENAME);
 			TrackerClient trackerClient = new TrackerClient(ClientGlobal.g_tracker_group);
+			//跟踪器的连接
 			TrackerServer trackerServer = trackerClient.getConnection();
 			if (trackerServer == null) {
 				logger.error("getConnection return null");
 			}
+			//获取存储器
 			StorageServer storageServer = trackerClient.getStoreStorage(trackerServer);
 			if (storageServer == null) {
 				logger.error("getStoreStorage return null");
@@ -57,12 +60,14 @@ public class FastDFSClient {
 	public static String uploadFile(File file, String fileName) {
 		FileInputStream fis = null;
 		try {
-			NameValuePair[] meta_list = null; // new NameValuePair[0];
+			// new NameValuePair[0];
+			NameValuePair[] meta_list = null;
 			fis = new FileInputStream(file);
 			byte[] file_buff = null;
 			if (fis != null) {
 				int len = fis.available();
 				file_buff = new byte[len];
+				//一次性把文件读到byte数组中 所以大文件的话会有问题的
 				fis.read(file_buff);
 			}
 
