@@ -40,6 +40,7 @@ public class TrackerGroup {
         //绑定套接字前启用 SO_REUSEADDR 允许在上一个连接处于超时状态时绑定套接字
         sock.setReuseAddress(true);
         sock.setSoTimeout(ClientGlobal.g_network_timeout);
+        //建立连接 三次握手
         sock.connect(this.tracker_servers[serverIndex], ClientGlobal.g_connect_timeout);
         return new TrackerServer(sock, this.tracker_servers[serverIndex]);
     }
