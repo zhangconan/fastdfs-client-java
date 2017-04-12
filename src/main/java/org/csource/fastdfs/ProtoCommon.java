@@ -200,18 +200,19 @@ public class ProtoCommon {
         byte[] header;
         int bytes;
         long pkg_len;
-
+        //十个字节长度的数组
         header = new byte[FDFS_PROTO_PKG_LEN_SIZE + 2];
-
+        //读取十个字节数组长度的内容
+        //如果读取到的长度不到十个字节数组的长度，说明数据不完整 传送错误
         if ((bytes = in.read(header)) != header.length) {
             throw new IOException("recv package size " + bytes + " != " + header.length);
         }
-
+        //header中下标为8的值
         if (header[PROTO_HEADER_CMD_INDEX] != expect_cmd) {
             throw new IOException(
                 "recv cmd: " + header[PROTO_HEADER_CMD_INDEX] + " is not correct, expect cmd: " + expect_cmd);
         }
-
+        //header中下标为9的值 状态信息
         if (header[PROTO_HEADER_STATUS_INDEX] != 0) {
             return new RecvHeaderInfo(header[PROTO_HEADER_STATUS_INDEX], 0);
         }
@@ -238,13 +239,15 @@ public class ProtoCommon {
      */
     public static RecvPackageInfo recvPackage(InputStream in, byte expect_cmd, long expect_body_len)
         throws IOException {
+        //得到状态码和body的长度
         RecvHeaderInfo header = recvHeader(in, expect_cmd, expect_body_len);
         if (header.errno != 0) {
             return new RecvPackageInfo(header.errno, null);
         }
-
+        //创建body长度的字节数组
         byte[] body = new byte[(int)header.body_len];
         int totalBytes = 0;
+        //body字节数组的长度
         int remainBytes = (int)header.body_len;
         int bytes;
 
