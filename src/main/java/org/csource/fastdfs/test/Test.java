@@ -30,17 +30,11 @@ public class Test
 	*/
   public static void main(String args[])
   {
-  	if (args.length < 2)
-  	{
-  		System.out.println("Error: Must have 2 parameters, one is config filename, "
-  		                 + "the other is the local filename to upload");
-  		return;
-  	}
-  	
+
   	System.out.println("java.version=" + System.getProperty("java.version"));
   	  
-  	String conf_filename = args[0];
-  	String local_filename = args[1];
+  	String conf_filename = "D:\\CUST\\workspace\\SourceCode\\fastdfs\\fastdfs-client-java\\src\\main\\resources\\fdfs_client.conf";
+  	String local_filename = "D:\\CUST\\workspace\\SourceCode\\fastdfs\\fastdfs-client-java\\src\\main\\resources\\image01.jpg";
   	
   	try
   	{

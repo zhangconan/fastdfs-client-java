@@ -140,7 +140,7 @@ public class StorageClient {
                                    NameValuePair[] meta_list) throws IOException, MyException {
         File f = new File(local_filename);
         FileInputStream fis = new FileInputStream(f);
-
+        //取后缀名
         if (file_ext_name == null) {
             int nPos = local_filename.lastIndexOf('.');
             if (nPos > 0 && local_filename.length() - nPos <= ProtoCommon.FDFS_FILE_EXT_NAME_MAX_LEN + 1) {
@@ -653,19 +653,27 @@ public class StorageClient {
     protected String[] do_upload_file(byte cmd, String group_name, String master_filename,
                                       String prefix_name, String file_ext_name, long file_size, UploadCallback callback,
                                       NameValuePair[] meta_list) throws IOException, MyException {
+        //STORAGE_PROTO_CMD_UPLOAD_FILE
+        //头信息
         byte[] header;
         byte[] ext_name_bs;
         String new_group_name;
         String remote_filename;
+        //是不是新的连接
         boolean bNewConnection;
+        //存储器Socket
         Socket storageSocket;
+        //字节数组
         byte[] sizeBytes;
+        //主文件名 转换为的字节数组
         byte[] hexLenBytes;
+        //主文件的字节数组
         byte[] masterFilenameBytes;
         boolean bUploadSlave;
+        //偏移量
         int offset;
         long body_len;
-
+        //是否上传从文件
         bUploadSlave = ((group_name != null && group_name.length() > 0) &&
             (master_filename != null && master_filename.length() > 0) &&
             (prefix_name != null));
@@ -677,8 +685,9 @@ public class StorageClient {
 
         try {
             storageSocket = this.storageServer.getSocket();
-
+            //后缀名的长度
             ext_name_bs = new byte[ProtoCommon.FDFS_FILE_EXT_NAME_MAX_LEN];
+            //用0填满后缀名的字节数组
             Arrays.fill(ext_name_bs, (byte)0);
             if (file_ext_name != null && file_ext_name.length() > 0) {
                 byte[] bs = file_ext_name.getBytes(ClientGlobal.g_charset);
@@ -686,68 +695,87 @@ public class StorageClient {
                 if (ext_name_len > ProtoCommon.FDFS_FILE_EXT_NAME_MAX_LEN) {
                     ext_name_len = ProtoCommon.FDFS_FILE_EXT_NAME_MAX_LEN;
                 }
+                //将后缀名的字节数组传入到ext_name_bs字节数组中
                 System.arraycopy(bs, 0, ext_name_bs, 0, ext_name_len);
             }
-
+            //如果上传的是从文件
             if (bUploadSlave) {
+                //获取主文件的字节数组
                 masterFilenameBytes = master_filename.getBytes(ClientGlobal.g_charset);
-
+                //size字节数组为16个字节元素
                 sizeBytes = new byte[2 * ProtoCommon.FDFS_PROTO_PKG_LEN_SIZE];
+                //消息体的长度 16+16+6+主文件的字节数组长度+文件的长度
                 body_len = sizeBytes.length + ProtoCommon.FDFS_FILE_PREFIX_MAX_LEN
                     + ProtoCommon.FDFS_FILE_EXT_NAME_MAX_LEN
                     + masterFilenameBytes.length + file_size;
-
+                //将主文件名的长度转换为字节数组 BigEndian
                 hexLenBytes = ProtoCommon.long2buff(master_filename.length());
+                //sizeBytes前八个字节长度为 主文件名
                 System.arraycopy(hexLenBytes, 0, sizeBytes, 0, hexLenBytes.length);
                 offset = hexLenBytes.length;
             } else {
                 masterFilenameBytes = null;
+                //sizeBytes为9个字节长度的数组
                 sizeBytes = new byte[1 + 1 * ProtoCommon.FDFS_PROTO_PKG_LEN_SIZE];
+                //消息体的长度 9+6+文件长度
                 body_len = sizeBytes.length + ProtoCommon.FDFS_FILE_EXT_NAME_MAX_LEN + file_size;
-
+                //sizeBytes的第一个字节为存储服务器上路径索引
                 sizeBytes[0] = (byte)this.storageServer.getStorePathIndex();
+                //偏移量
                 offset = 1;
             }
-
+            //将文件长度转换为字节数组 BigEndian
             hexLenBytes = ProtoCommon.long2buff(file_size);
+            //sizeBytes的后几位存储的值为 文件长度  sizeBytes存储的内容为：主文件名的长度+文件的长度
             System.arraycopy(hexLenBytes, 0, sizeBytes, offset, hexLenBytes.length);
-
+            //获取存储服务器的输出流
             OutputStream out = storageSocket.getOutputStream();
+            //头字节数组信息(十长度)：前八位：要发送的消息的长度 第九位：命令 第十位：状态
             header = ProtoCommon.packHeader(cmd, body_len, (byte)0);
+            //整个包的长度：头信息+包体的长度-文件的长度
             byte[] wholePkg = new byte[(int)(header.length + body_len - file_size)];
+            //填充整个包的数据
             System.arraycopy(header, 0, wholePkg, 0, header.length);
             System.arraycopy(sizeBytes, 0, wholePkg, header.length, sizeBytes.length);
+            //偏移量
             offset = header.length + sizeBytes.length;
             if (bUploadSlave) {
+                //如果上传的是从文件
+                //获取前缀文件名
                 byte[] prefix_name_bs = new byte[ProtoCommon.FDFS_FILE_PREFIX_MAX_LEN];
+                //前缀文件名转换为字节数组
                 byte[] bs = prefix_name.getBytes(ClientGlobal.g_charset);
                 int prefix_name_len = bs.length;
                 Arrays.fill(prefix_name_bs, (byte)0);
+                //只有前16位
                 if (prefix_name_len > ProtoCommon.FDFS_FILE_PREFIX_MAX_LEN) {
                     prefix_name_len = ProtoCommon.FDFS_FILE_PREFIX_MAX_LEN;
                 }
                 if (prefix_name_len > 0) {
                     System.arraycopy(bs, 0, prefix_name_bs, 0, prefix_name_len);
                 }
-
+                //wholePkg = header+sizeBytes+prefix_name_bs
                 System.arraycopy(prefix_name_bs, 0, wholePkg, offset, prefix_name_bs.length);
+                //偏移量
                 offset += prefix_name_bs.length;
             }
-
+            //wholePkg = header+sizeBytes+prefix_name_bs+ext_name_bs
             System.arraycopy(ext_name_bs, 0, wholePkg, offset, ext_name_bs.length);
+            //改变偏移量
             offset += ext_name_bs.length;
-
+            //如果上传的是从文件名
             if (bUploadSlave) {
+                //wholePkg = header+sizeBytes+[prefix_name_bs]+ext_name_bs+[masterFilenameBytes]
                 System.arraycopy(masterFilenameBytes, 0, wholePkg, offset, masterFilenameBytes.length);
                 offset += masterFilenameBytes.length;
             }
 
             out.write(wholePkg);
-
+            //发送消息
             if ((this.errno = (byte)callback.send(out)) != 0) {
                 return null;
             }
-
+            //接收返回消息
             ProtoCommon.RecvPackageInfo pkgInfo = ProtoCommon.recvPackage(storageSocket.getInputStream(),
                 ProtoCommon.STORAGE_PROTO_CMD_RESP, -1);
             this.errno = pkgInfo.errno;
@@ -759,8 +787,9 @@ public class StorageClient {
                 throw new MyException(
                     "body length: " + pkgInfo.body.length + " <= " + ProtoCommon.FDFS_GROUP_NAME_MAX_LEN);
             }
-
+            //获取group名字
             new_group_name = new String(pkgInfo.body, 0, ProtoCommon.FDFS_GROUP_NAME_MAX_LEN).trim();
+            //获取远程文件名
             remote_filename = new String(pkgInfo.body, ProtoCommon.FDFS_GROUP_NAME_MAX_LEN,
                 pkgInfo.body.length - ProtoCommon.FDFS_GROUP_NAME_MAX_LEN);
             String[] results = new String[2];
@@ -773,6 +802,7 @@ public class StorageClient {
 
             int result = 0;
             try {
+                //重写meta
                 result = this.set_metadata(new_group_name, remote_filename,
                     meta_list, ProtoCommon.STORAGE_SET_METADATA_FLAG_OVERWRITE);
             } catch (IOException ex) {

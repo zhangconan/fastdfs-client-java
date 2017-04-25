@@ -6,6 +6,7 @@ import java.io.InputStream;
 import org.csource.fastdfs.FastDFSClient;
 import org.apache.commons.io.FileUtils;
 import org.junit.*;
+import org.junit.Test;
 
 /**
  * 
@@ -48,10 +49,15 @@ public class FastDFSTest {
 	 * 删除测试
 	 * @throws Exception
 	 */
-	public static void delete() throws Exception {
-		String fileId = "group1/M00/00/00/wKgEfVUYPieAd6a0AAP3btxj__E335.jpg";
+	@Test
+	public void delete() throws Exception {
+		String fileId = "group1/M00/00/00/wKi0hVjqXGeAcyFfAAGSt-FxG-0872.jpg";
 		int result = FastDFSClient.deleteFile(fileId);
 		System.out.println(result == 0 ? "删除成功" : "删除失败:" + result);
+	}
+	@Test
+	public void testGetMetadata(){
+		//get_metadata1
 	}
 
 
@@ -63,7 +69,7 @@ public class FastDFSTest {
 	public static void main(String[] args) throws Exception {
 		//upload();
 		//download();
-		delete();
+		//delete();
 
 	}
 

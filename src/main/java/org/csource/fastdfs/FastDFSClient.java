@@ -183,4 +183,8 @@ public class FastDFSClient {
 			return fileName.substring(fileName.lastIndexOf(".") + 1); // 不带最后的点
 		}
 	}
+
+	public static NameValuePair[] get_metadata1(String file_id) {
+		return null;
+	}
 }
