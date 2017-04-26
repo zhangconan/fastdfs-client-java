@@ -1569,7 +1569,7 @@ public class StorageClient {
                 2 * ProtoCommon.FDFS_PROTO_PKG_LEN_SIZE + 1 + groupBytes.length
                     + filenameBytes.length + meta_buff.length, (byte)0);
             OutputStream out = storageSocket.getOutputStream();
-            //整个包的信息
+            //整个包的信息 10+16+1+16+
             byte[] wholePkg = new byte[header.length + sizeBytes.length + 1 + groupBytes.length + filenameBytes.length];
             System.arraycopy(header, 0, wholePkg, 0, header.length);
             System.arraycopy(sizeBytes, 0, wholePkg, header.length, sizeBytes.length);
