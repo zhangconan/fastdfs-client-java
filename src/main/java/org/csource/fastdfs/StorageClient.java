@@ -717,7 +717,7 @@ public class StorageClient {
 
         try {
             storageSocket = this.storageServer.getSocket();
-            //后缀名的长度
+            //后缀名的长度6个字节
             ext_name_bs = new byte[ProtoCommon.FDFS_FILE_EXT_NAME_MAX_LEN];
             //用0填满后缀名的字节数组
             Arrays.fill(ext_name_bs, (byte)0);
@@ -1520,30 +1520,39 @@ public class StorageClient {
         Socket storageSocket = this.storageServer.getSocket();
 
         try {
+            //头信息
             byte[] header;
+            //组名的字节数组
             byte[] groupBytes;
+            //文件名的字节数组
             byte[] filenameBytes;
+            //meta的字节数组
             byte[] meta_buff;
             byte[] bs;
+            //组的长度
             int groupLen;
+            //字节数组的长度
             byte[] sizeBytes;
             ProtoCommon.RecvPackageInfo pkgInfo;
 
             if (meta_list == null) {
                 meta_buff = new byte[0];
             } else {
+                //如果传了meta的信息
                 meta_buff = ProtoCommon.pack_metadata(meta_list).getBytes(ClientGlobal.g_charset);
             }
 
             filenameBytes = remote_filename.getBytes(ClientGlobal.g_charset);
             sizeBytes = new byte[2 * ProtoCommon.FDFS_PROTO_PKG_LEN_SIZE];
             Arrays.fill(sizeBytes, (byte)0);
-
+            //转换为大头
             bs = ProtoCommon.long2buff(filenameBytes.length);
+            //size数组的前八位是 文件名的长度
             System.arraycopy(bs, 0, sizeBytes, 0, bs.length);
             bs = ProtoCommon.long2buff(meta_buff.length);
+            //接下来的八位是 meta的信息
             System.arraycopy(bs, 0, sizeBytes, ProtoCommon.FDFS_PROTO_PKG_LEN_SIZE, bs.length);
-
+            //16个字节长度的数组
             groupBytes = new byte[ProtoCommon.FDFS_GROUP_NAME_MAX_LEN];
             bs = group_name.getBytes(ClientGlobal.g_charset);
 
@@ -1553,12 +1562,14 @@ public class StorageClient {
             } else {
                 groupLen = groupBytes.length;
             }
+            //组的字节数组信息
             System.arraycopy(bs, 0, groupBytes, 0, groupLen);
-
+            //头的长度13+16+1+groupBytes+filenameBytes+meta_buff+0
             header = ProtoCommon.packHeader(ProtoCommon.STORAGE_PROTO_CMD_SET_METADATA,
                 2 * ProtoCommon.FDFS_PROTO_PKG_LEN_SIZE + 1 + groupBytes.length
                     + filenameBytes.length + meta_buff.length, (byte)0);
             OutputStream out = storageSocket.getOutputStream();
+            //整个包的信息
             byte[] wholePkg = new byte[header.length + sizeBytes.length + 1 + groupBytes.length + filenameBytes.length];
             System.arraycopy(header, 0, wholePkg, 0, header.length);
             System.arraycopy(sizeBytes, 0, wholePkg, header.length, sizeBytes.length);
@@ -1570,7 +1581,7 @@ public class StorageClient {
             if (meta_buff.length > 0) {
                 out.write(meta_buff);
             }
-
+            //返回的信息
             pkgInfo = ProtoCommon.recvPackage(storageSocket.getInputStream(),
                 ProtoCommon.STORAGE_PROTO_CMD_RESP, 0);
 
