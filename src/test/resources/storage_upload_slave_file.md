@@ -1,9 +1,9 @@
-#### STORAGE_PROTO_CMD_UPLOAD_FILE 上传从文件   
+#### STORAGE_PROTO_CMD_UPLOAD_SLAVE_FILE 上传从文件   
  
 |位置|内容| 
 |----|----|
 |0-7 |body_len|
-|8|STORAGE_PROTO_CMD_UPLOAD_FILE|
+|8|STORAGE_PROTO_CMD_UPLOAD_SLAVE_FILE|
 |9|0|
 |10-17|主文件名长度master_filename.length()|
 |18-25|文件大小file_size|

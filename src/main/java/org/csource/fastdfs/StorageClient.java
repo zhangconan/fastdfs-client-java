@@ -1807,9 +1807,10 @@ public class StorageClient {
         byte[] filenameBytes;
         byte[] bs;
         int groupLen;
-
+        //groupBytes 16个字节
         groupBytes = new byte[ProtoCommon.FDFS_GROUP_NAME_MAX_LEN];
         bs = group_name.getBytes(ClientGlobal.g_charset);
+        //文件名M01/00/
         filenameBytes = remote_filename.getBytes(ClientGlobal.g_charset);
 
         Arrays.fill(groupBytes, (byte)0);
@@ -1819,8 +1820,9 @@ public class StorageClient {
             groupLen = groupBytes.length;
         }
         System.arraycopy(bs, 0, groupBytes, 0, groupLen);
-
+        // body_len = 16+filenameBytes.length
         header = ProtoCommon.packHeader(cmd, groupBytes.length + filenameBytes.length, (byte)0);
+        //10+16+filenameBytes.length
         byte[] wholePkg = new byte[header.length + groupBytes.length + filenameBytes.length];
         System.arraycopy(header, 0, wholePkg, 0, header.length);
         System.arraycopy(groupBytes, 0, wholePkg, header.length, groupBytes.length);
